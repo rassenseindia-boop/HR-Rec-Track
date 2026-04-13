@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recruit HR Track</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+:root{
+  --bg:#f0ede8;--surface:#fff;--surface2:#f7f5f1;--border:#e4e1d8;--border2:#ccc9be;
+  --text:#1c1a17;--text2:#5c5a54;--text3:#9a9790;
+  --green:#1b6b45;--green-l:#d4edd9;--green-d:#0f4128;
+  --red:#b91c1c;--red-l:#fee2e2;--yellow:#92400e;--yellow-l:#fef3c7;
+  --blue:#1449a0;--blue-l:#dbeafe;--purple:#5b21b6;--purple-l:#ede9fe;
+  --r:10px;--rs:6px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;}
+.lcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:380px;}
+.lcard h1{font-size:24px;font-weight:700;letter-spacing:-.5px;margin-bottom:3px;}
+.lcard h1 span{color:var(--green);}
+.lcard p{color:var(--text2);font-size:13px;margin-bottom:26px;}
+.role-row{display:flex;gap:8px;margin-bottom:18px;}
+.rbtn{flex:1;padding:10px;border:1.5px solid var(--border);border-radius:var(--rs);background:none;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;transition:.2s;}
+.rbtn.active{border-color:var(--green);background:var(--green-l);color:var(--green-d);}
+.linput{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rs);font-family:var(--font);font-size:14px;background:var(--surface2);margin-bottom:10px;}
+.lbtn{width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:var(--rs);cursor:pointer;font-family:var(--font);font-weight:600;font-size:14px;}
+.lhint{font-size:11px;color:var(--text3);margin-top:10px;text-align:center;}
+
+/* APP */
+#app{display:none;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;height:52px;gap:0;overflow-x:auto;}
+.tlogo{font-weight:700;font-size:15px;letter-spacing:-.3px;color:var(--green);margin-right:28px;white-space:nowrap;flex-shrink:0;}
+.tlogo span{color:var(--text3);font-weight:400;}
+.ttab{padding:0 14px;height:52px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:.15s;}
+.ttab:hover{color:var(--text);}
+.ttab.active{color:var(--green);border-bottom-color:var(--green);}
+.tright{margin-left:auto;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.rbadge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--green-l);color:var(--green-d);text-transform:uppercase;letter-spacing:.5px;}
+.rbadge.viewer{background:var(--purple-l);color:var(--purple);}
+.logoutbtn{font-size:12px;color:var(--text2);cursor:pointer;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:none;font-family:var(--font);}
+
+.page{display:none;padding:22px;max-width:1280px;margin:0 auto;}
+.page.active{display:block;}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;}
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sec-title{font-size:15px;font-weight:600;}
+
+/* STATS */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;}
+.stat-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.stat-val{font-size:26px;font-weight:700;}
+.stat-sub{font-size:12px;color:var(--text3);margin-top:3px;}
+
+/* BADGES */
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;}
+.bg{background:var(--green-l);color:var(--green-d);}
+.br{background:var(--red-l);color:var(--red);}
+.by{background:var(--yellow-l);color:var(--yellow);}
+.bb{background:var(--blue-l);color:var(--blue);}
+.bp{background:var(--purple-l);color:var(--purple);}
+.bgr{background:#f1efe8;color:var(--text2);}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;padding:9px 11px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);background:var(--surface2);}
+td{padding:10px 11px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface2);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--rs);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:.15s;border:1px solid transparent;}
+.btn-p{background:var(--green);color:#fff;border-color:var(--green);}
+.btn-p:hover{background:#154f34;}
+.btn-o{background:none;color:var(--text);border-color:var(--border2);}
+.btn-o:hover{background:var(--surface2);}
+.btn-sm{padding:4px 9px;font-size:12px;}
+.btn-d{background:none;color:var(--red);border-color:var(--red);}
+.btn-blue{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+/* FORMS */
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg.full{grid-column:1/-1;}
+label{font-size:12px;font-weight:500;color:var(--text2);}
+input,select,textarea{padding:8px 10px;border:1px solid var(--border);border-radius:var(--rs);font-family:var(--font);font-size:13px;background:var(--surface);color:var(--text);width:100%;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
+textarea{resize:vertical;min-height:70px;}
+
+/* MODAL */
+.moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:500;align-items:center;justify-content:center;}
+.moverlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:14px;padding:26px;width:720px;max-width:96vw;max-height:90vh;overflow-y:auto;}
+.mhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.mtitle{font-size:17px;font-weight:600;}
+.mclose{background:none;border:none;cursor:pointer;font-size:22px;color:var(--text3);}
+
+/* AI */
+.ai-msg{padding:12px 14px;border-radius:var(--r);font-size:13px;line-height:1.6;}
+.ai-bot{background:var(--surface2);border:1px solid var(--border);}
+.ai-user{background:var(--green-l);border:1px solid #b7e4c7;color:var(--green-d);align-self:flex-end;}
+.chat-log{max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px;}
+
+/* PROGRESS */
+.pbar{background:var(--border);border-radius:4px;height:6px;}
+.pfill{height:100%;border-radius:4px;background:var(--green);}
+
+/* CHIP */
+.chip{display:inline-block;padding:3px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:11px;margin:2px;}
+
+/* UPLOAD ZONE */
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;transition:.2s;background:var(--surface2);}
+.upload-zone:hover{border-color:var(--green);background:var(--green-l);}
+.upload-zone.dragging{border-color:var(--green);background:var(--green-l);}
+
+/* AVATAR */
+.avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;background:var(--blue-l);color:var(--blue);flex-shrink:0;}
+
+/* SCORE */
+.score-ring{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;}
+.score-high{background:var(--green-l);color:var(--green-d);}
+.score-med{background:var(--yellow-l);color:var(--yellow);}
+.score-low{background:var(--red-l);color:var(--red);}
+
+/* TABS INSIDE PAGE */
+.inner-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:18px;}
+.itab{padding:8px 16px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:.15s;}
+.itab.active{color:var(--green);border-bottom-color:var(--green);}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+@media(max-width:700px){.g4{grid-template-columns:1fr 1fr;}.g2{grid-template-columns:1fr;}.frow{grid-template-columns:1fr;}.topbar{overflow-x:auto;}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="lcard">
+    <h1>Recruit <span>HR Track</span></h1>
+    <p>Sign in to continue to your dashboard</p>
+    <div class="role-row">
+      <button class="rbtn active" id="role-admin" onclick="selRole('admin')">Admin (You)</button>
+      <button class="rbtn" id="role-user" onclick="selRole('user')">Viewer / Interviewer</button>
+    </div>
+    <input class="linput" type="text" id="ln" placeholder="Your name" />
+    <input class="linput" type="password" id="lp" placeholder="Password" />
+    <button class="lbtn" onclick="doLogin()">Sign In</button>
+    <p class="lhint">Admin: <b>admin123</b> &nbsp;|&nbsp; Viewer: <b>view123</b></p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="tlogo">Recruit <span>HR Track</span></div>
+    <div class="ttab active" data-page="dashboard" onclick="nav(this,'dashboard')">Dashboard</div>
+    <div class="ttab" data-page="positions" onclick="nav(this,'positions')">Positions</div>
+    <div class="ttab" data-page="candidates" onclick="nav(this,'candidates')">Candidates</div>
+    <div class="ttab" data-page="jd" onclick="nav(this,'jd')">Job Descriptions</div>
+    <div class="ttab" data-page="aibot" onclick="nav(this,'aibot')">AI Screener</div>
+    <div class="tright">
+      <span id="rbadge" class="rbadge">Admin</span>
+      <span id="uname" style="font-size:13px;color:var(--text2);"></span>
+      <button class="logoutbtn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="pg-dashboard" class="page active">
+    <div class="sec-header" style="margin-bottom:18px;">
+      <div><h2 style="font-size:19px;font-weight:700;">Hiring Dashboard</h2><p style="color:var(--text2);font-size:13px;margin-top:2px;">Real-time recruitment overview</p></div>
+      <button class="btn btn-p admin-el" onclick="openModal('m-position');clearPositionForm()">+ Add Position</button>
+    </div>
+    <div class="g4">
+      <div class="stat-card"><div class="stat-label">Open Positions</div><div class="stat-val" id="s-open">0</div><div class="stat-sub">Currently hiring</div></div>
+      <div class="stat-card"><div class="stat-label">Closed Positions</div><div class="stat-val" id="s-closed">0</div><div class="stat-sub">Filled / cancelled</div></div>
+      <div class="stat-card"><div class="stat-label">Total Candidates</div><div class="stat-val" id="s-cands">0</div><div class="stat-sub">Across all positions</div></div>
+      <div class="stat-card"><div class="stat-label">Interviews Pending</div><div class="stat-val" id="s-pending">0</div><div class="stat-sub">Awaiting action</div></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="sec-header"><div class="sec-title">Pipeline by Position</div></div>
+        <div id="dash-bars" style="display:flex;flex-direction:column;gap:10px;"></div>
+      </div>
+      <div class="card">
+        <div class="sec-header"><div class="sec-title">Panel Review Pending</div></div>
+        <div id="dash-reviews" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-header"><div class="sec-title">All Positions Summary</div></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Position</th><th>Dept</th><th>Openings</th><th>Candidates</th><th>Interviews</th><th>Status</th><th>Target Date</th></tr></thead><tbody id="dash-tbl"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- POSITIONS -->
+  <div id="pg-positions" class="page">
+    <div class="sec-header">
+      <div><h2 style="font-size:19px;font-weight:700;">Positions</h2><p style="color:var(--text2);font-size:13px;margin-top:2px;">All open & closed positions with candidate pipeline</p></div>
+      <button class="btn btn-p admin-el" onclick="openModal('m-position');clearPositionForm()">+ Add Position</button>
+    </div>
+    <div id="pos-list"></div>
+  </div>
+
+  <!-- CANDIDATES -->
+  <div id="pg-candidates" class="page">
+    <div class="sec-header">
+      <div><h2 style="font-size:19px;font-weight:700;">Candidates</h2><p style="color:var(--text2);font-size:13px;margin-top:2px;">Browse by position — view profiles, upload resumes, download details</p></div>
+      <button class="btn btn-p admin-el" onclick="openAddCandidate(null)">+ Add Candidate</button>
+    </div>
+    <div id="cand-pos-tabs" class="inner-tabs" style="flex-wrap:wrap;gap:0;"></div>
+    <div id="cand-pos-content"></div>
+  </div>
+
+  <!-- JD -->
+  <div id="pg-jd" class="page">
+    <div class="sec-header">
+      <div><h2 style="font-size:19px;font-weight:700;">Job Descriptions</h2><p style="color:var(--text2);font-size:13px;margin-top:2px;">Upload JD documents (PDF or Word) — text extracted automatically</p></div>
+      <button class="btn btn-p admin-el" onclick="openModal('m-jd');clearJDForm()">+ Upload JD</button>
+    </div>
+    <div id="jd-list" style="display:flex;flex-direction:column;gap:16px;"></div>
+  </div>
+
+  <!-- AI SCREENER -->
+  <div id="pg-aibot" class="page">
+    <div class="sec-header">
+      <div><h2 style="font-size:19px;font-weight:700;">AI Resume Screener</h2><p style="color:var(--text2);font-size:13px;margin-top:2px;">Upload or paste resume — AI analyses against selected JD</p></div>
+    </div>
+    <div class="g2" style="align-items:start;">
+      <div class="card">
+        <div class="sec-title" style="margin-bottom:12px;">1. Select Job Description</div>
+        <div class="fg" style="margin-bottom:12px;"><label>Position / JD</label><select id="ai-jd" onchange="updateJDPreview()"><option value="">-- Select JD --</option></select></div>
+        <div id="ai-jd-preview" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px;font-size:12px;color:var(--text2);min-height:80px;max-height:200px;overflow-y:auto;white-space:pre-wrap;line-height:1.6;"></div>
+      </div>
+      <div class="card">
+        <div class="sec-title" style="margin-bottom:12px;">2. Resume Input</div>
+        <div style="margin-bottom:10px;">
+          <div class="upload-zone" onclick="document.getElementById('ai-resume-file').click()" id="ai-resume-zone">
+            <div style="font-size:24px;margin-bottom:6px;">📄</div>
+            <div style="font-weight:500;font-size:13px;">Upload Resume (PDF or Word)</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:3px;">Click to browse or drag & drop</div>
+          </div>
+          <input type="file" id="ai-resume-file" accept=".pdf,.doc,.docx" style="display:none;" onchange="handleAIResume(this)">
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px;text-align:center;">— or paste text —</div>
+        <textarea id="ai-resume-txt" placeholder="Paste resume text here..." style="min-height:120px;font-size:12px;"></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+          <input type="text" id="ai-cname" placeholder="Candidate name (optional)" style="flex:1;min-width:130px;" />
+          <button class="btn btn-p" onclick="runScreening()" id="ai-btn">Analyse Resume</button>
+        </div>
+      </div>
+    </div>
+    <div id="ai-result-wrap" style="display:none;" class="card">
+      <div class="sec-title" style="margin-bottom:14px;">Screening Result</div>
+      <div id="ai-result"></div>
+    </div>
+    <div class="card">
+      <div class="sec-title" style="margin-bottom:12px;">AI Chat Assistant</div>
+      <div class="chat-log" id="ai-log"><div class="ai-msg ai-bot">Hello! Run a resume analysis above or ask me anything about a candidate or JD.</div></div>
+      <div style="display:flex;gap:8px;margin-top:12px;align-items:flex-end;">
+        <textarea id="ai-q" placeholder="Ask a question... (Ctrl+Enter to send)" rows="2" style="flex:1;"></textarea>
+        <button class="btn btn-p" onclick="aiChat()" id="ai-chat-btn">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Position Modal -->
+<div class="moverlay" id="m-position">
+  <div class="modal">
+    <div class="mhdr"><span class="mtitle" id="m-pos-title">Add Position</span><button class="mclose" onclick="closeModal('m-position')">×</button></div>
+    <div class="frow">
+      <div class="fg"><label>Job Title *</label><input id="p-title" placeholder="e.g. Senior Frontend Engineer"/></div>
+      <div class="fg"><label>Department *</label><input id="p-dept" placeholder="e.g. Engineering"/></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>No. of Openings</label><input id="p-open" type="number" value="1" min="1"/></div>
+      <div class="fg"><label>Target Close Date</label><input id="p-date" type="date"/></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Status</label><select id="p-status"><option>Open</option><option>On Hold</option><option>Closed</option></select></div>
+      <div class="fg"><label>Hiring Manager</label><input id="p-mgr" placeholder="e.g. Priya Sharma"/></div>
+    </div>
+    <div class="frow"><div class="fg full"><label>Remarks</label><textarea id="p-rem" placeholder="Notes about this position..."></textarea></div></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
+      <button class="btn btn-o" onclick="closeModal('m-position')">Cancel</button>
+      <button class="btn btn-p" onclick="savePosition()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Candidate Modal -->
+<div class="moverlay" id="m-candidate">
+  <div class="modal" style="width:780px;">
+    <div class="mhdr"><span class="mtitle" id="m-cand-title">Add Candidate</span><button class="mclose" onclick="closeModal('m-candidate')">×</button></div>
+    <div class="frow">
+      <div class="fg"><label>Full Name *</label><input id="c-name" placeholder="Candidate full name"/></div>
+      <div class="fg"><label>Email</label><input id="c-email" type="email" placeholder="email@domain.com"/></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Phone</label><input id="c-phone" placeholder="+91 98765 43210"/></div>
+      <div class="fg"><label>Position Applied *</label><select id="c-pos"></select></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Current Company</label><input id="c-co" placeholder="Current employer"/></div>
+      <div class="fg"><label>Experience (years)</label><input id="c-exp" type="number" placeholder="5"/></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Current CTC (LPA)</label><input id="c-ctc" type="number" step="0.5" placeholder="e.g. 12"/></div>
+      <div class="fg"><label>Expected CTC (LPA)</label><input id="c-ectc" type="number" step="0.5" placeholder="e.g. 18"/></div>
+    </div>
+    <div class="frow">
+      <div class="fg full"><label>Reason for Change</label><input id="c-rfc" placeholder="e.g. Better growth, relocation, compensation mismatch"/></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Interview Mode</label><select id="c-mode"><option>Virtual</option><option>In-Person</option><option>Hybrid</option></select></div>
+      <div class="fg"><label>Interview Round</label><select id="c-round"><option>Screening</option><option>Technical Round 1</option><option>Technical Round 2</option><option>HR Round</option><option>Final Round</option><option>Management Round</option></select></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Interview Status</label><select id="c-status"><option>Pending</option><option>Shortlisted</option><option>Interview Scheduled</option><option>Interview Done</option><option>Selected</option><option>Rejected</option><option>On Hold</option></select></div>
+      <div class="fg"><label>Interview Date</label><input id="c-idate" type="date"/></div>
+    </div>
+    <div class="frow">
+      <div class="fg full"><label>Interview Panel Members (comma separated)</label><input id="c-panel" placeholder="e.g. Kiran Bhat, Priya Sharma, Rahul Mehta"/></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Panel Review Status</label><select id="c-revst"><option>Pending</option><option>Reviewing</option><option>Feedback Submitted</option></select></div>
+      <div class="fg"><label>Notice Period (days)</label><input id="c-notice" type="number" placeholder="30"/></div>
+    </div>
+    <div class="frow"><div class="fg full"><label>Candidate Summary</label><textarea id="c-sum" placeholder="Brief summary of the candidate..."></textarea></div></div>
+    <div class="frow"><div class="fg full"><label>IAF / Profile Details (paste extracted info)</label><textarea id="c-iaf" placeholder="Educational details, skills, certifications..." style="min-height:90px;"></textarea></div></div>
+    <div class="frow"><div class="fg full"><label>Upload Resume (PDF / Word)</label>
+      <div class="upload-zone" onclick="document.getElementById('c-resume-file').click()" id="c-resume-zone" style="padding:14px;">
+        <div id="c-resume-label" style="font-size:13px;color:var(--text2);">Click to upload resume (PDF or Word)</div>
+      </div>
+      <input type="file" id="c-resume-file" accept=".pdf,.doc,.docx" style="display:none;" onchange="handleCandResume(this)">
+    </div></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
+      <button class="btn btn-o" onclick="closeModal('m-candidate')">Cancel</button>
+      <button class="btn btn-p" onclick="saveCandidate()">Save Candidate</button>
+    </div>
+  </div>
+</div>
+
+<!-- Remarks Modal -->
+<div class="moverlay" id="m-remarks">
+  <div class="modal" style="width:480px;">
+    <div class="mhdr"><span class="mtitle">Interview Feedback</span><button class="mclose" onclick="closeModal('m-remarks')">×</button></div>
+    <input type="hidden" id="rem-idx"/>
+    <div class="fg" style="margin-bottom:12px;"><label>Remarks / Observations</label><textarea id="rem-txt" placeholder="Detailed interview remarks..." style="min-height:100px;"></textarea></div>
+    <div class="fg" style="margin-bottom:14px;"><label>Recommendation</label><select id="rem-rec"><option value="">-- Select --</option><option>Recommend – Select</option><option>Recommend – Hold</option><option>Do Not Recommend – Reject</option></select></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-o" onclick="closeModal('m-remarks')">Cancel</button>
+      <button class="btn btn-p" onclick="saveRemarks()">Submit Feedback</button>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="moverlay" id="m-profile">
+  <div class="modal" style="width:700px;">
+    <div class="mhdr"><span class="mtitle">Candidate Profile</span><button class="mclose" onclick="closeModal('m-profile')">×</button></div>
+    <div id="profile-body"></div>
+  </div>
+</div>
+
+<!-- JD Modal -->
+<div class="moverlay" id="m-jd">
+  <div class="modal">
+    <div class="mhdr"><span class="mtitle" id="m-jd-title">Upload Job Description</span><button class="mclose" onclick="closeModal('m-jd')">×</button></div>
+    <div class="frow">
+      <div class="fg"><label>Position Title * (can auto-fill after upload)</label><input id="jd-title" placeholder="e.g. Senior Frontend Engineer"/></div>
+      <div class="fg"><label>Department</label><input id="jd-dept" placeholder="e.g. Engineering"/></div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;margin-bottom:6px;font-size:12px;font-weight:500;color:var(--text2);">Upload JD Document (PDF or Word) — text will be extracted automatically</label>
+      <div class="upload-zone" onclick="document.getElementById('jd-file').click()" id="jd-zone">
+        <div style="font-size:28px;margin-bottom:8px;">📋</div>
+        <div style="font-weight:500;font-size:13px;">Click to upload JD (PDF / .docx / .doc)</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px;">Or drag and drop here</div>
+        <div id="jd-file-name" style="font-size:12px;color:var(--green);margin-top:8px;font-weight:500;"></div>
+      </div>
+      <input type="file" id="jd-file" accept=".pdf,.doc,.docx" style="display:none;" onchange="handleJDUpload(this)">
+    </div>
+    <div class="fg" style="margin-bottom:12px;"><label>Extracted / Manual JD Text</label><textarea id="jd-desc" style="min-height:180px;font-size:12px;" placeholder="JD text will appear here after upload, or type manually..."></textarea></div>
+    <div class="frow">
+      <div class="fg"><label>Key Skills (auto-extracted or manual)</label><input id="jd-skills" placeholder="React, Node.js, TypeScript"/></div>
+      <div class="fg"><label>Experience Required</label><input id="jd-exp" placeholder="4-7 years"/></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Location</label><input id="jd-loc" placeholder="Bangalore / Remote"/></div>
+      <div class="fg"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
+      <button class="btn btn-o" onclick="closeModal('m-jd')">Cancel</button>
+      <button class="btn btn-p" onclick="saveJD()">Save JD</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== STATE ==========
+let isAdmin=false, currentUser='', editPosIdx=null, editCandIdx=null, editJDIdx=null, activeCandPos=0, lastAnalysis=null;
+
+let DB = {
+  positions:[
+    {title:'Senior Frontend Engineer',dept:'Engineering',openings:2,date:'2025-08-30',status:'Open',manager:'Priya Sharma',remarks:'Urgent hire'},
+    {title:'Data Analyst',dept:'Analytics',openings:1,date:'2025-09-15',status:'Open',manager:'Rahul Mehta',remarks:''},
+    {title:'HR Business Partner',dept:'HR',openings:1,date:'2025-07-31',status:'Closed',manager:'Anita Roy',remarks:'Filled'},
+  ],
+  candidates:[
+    {name:'Arjun Verma',email:'arjun@email.com',phone:'9876543210',position:'Senior Frontend Engineer',company:'Infosys',exp:5,ctc:14,ectc:20,rfc:'Better growth opportunity',mode:'Virtual',round:'Technical Round 1',status:'Interview Scheduled',idate:'2025-07-15',panel:'Kiran Bhat, Priya Sharma',revSt:'Pending',notice:60,summary:'Strong React & TypeScript. 5 yrs at Infosys.',iaf:'B.Tech CSE VIT 2019. Skills: React, TS, Node.js',remarks:'',recommendation:'',resumeName:'',resumeData:''},
+    {name:'Sana Mirza',email:'sana@email.com',phone:'9123456789',position:'Senior Frontend Engineer',company:'Wipro',exp:4,ctc:11,ectc:17,rfc:'Compensation mismatch',mode:'In-Person',round:'Screening',status:'Shortlisted',idate:'',panel:'Priya Sharma',revSt:'Reviewing',notice:30,summary:'Good CSS/HTML. Needs system design testing.',iaf:'',remarks:'Seems promising',recommendation:'Recommend – Hold',resumeName:'',resumeData:''},
+    {name:'Dev Kapoor',email:'dev@email.com',phone:'9988776655',position:'Data Analyst',company:'TCS',exp:3,ctc:9,ectc:14,rfc:'Career growth',mode:'Virtual',round:'HR Round',status:'Selected',idate:'2025-07-10',panel:'Rahul Mehta',revSt:'Feedback Submitted',notice:45,summary:'Excellent SQL and Power BI skills.',iaf:'B.Sc Statistics, Pune 2021',remarks:'Great fit',recommendation:'Recommend – Select',resumeName:'',resumeData:''},
+  ],
+  jds:[
+    {title:'Senior Frontend Engineer',dept:'Engineering',exp:'4-7 years',loc:'Bangalore / Remote',skills:'React, TypeScript, Node.js, CSS, REST APIs',desc:'We are looking for a Senior Frontend Engineer.\n\nResponsibilities:\n- Build and maintain high-quality React applications\n- Collaborate with designers and backend teams\n- Code reviews and mentoring juniors\n- Performance optimisation\n\nRequirements:\n- 4+ years React experience\n- Strong TypeScript skills\n- REST API integration\n- Good CSS/SCSS knowledge\n- Testing: Jest, Cypress\n\nNice to have: Next.js, GraphQL, AWS'},
+    {title:'Data Analyst',dept:'Analytics',exp:'2-5 years',loc:'Hyderabad',skills:'SQL, Python, Power BI, Excel, Statistics',desc:'Seeking a Data Analyst to derive insights from large datasets.\n\nResponsibilities:\n- Analyse complex datasets\n- Create Power BI dashboards\n- SQL queries and ETL pipelines\n\nRequirements:\n- 2+ years experience\n- Strong SQL\n- Python (pandas, numpy)\n- Power BI / Tableau\n- Statistical knowledge'},
+  ]
+};
+
+function persist(){try{localStorage.setItem('rhrtrack',JSON.stringify(DB));}catch(e){}}
+function hydrate(){try{const d=localStorage.getItem('rhrtrack');if(d)DB=JSON.parse(d);}catch(e){}}
+hydrate();
+
+// ========== AUTH ==========
+function selRole(r){
+  document.getElementById('role-admin').classList.toggle('active',r==='admin');
+  document.getElementById('role-user').classList.toggle('active',r==='user');
+}
+function doLogin(){
+  const name=document.getElementById('ln').value.trim()||'User';
+  const pass=document.getElementById('lp').value;
+  const adminSel=document.getElementById('role-admin').classList.contains('active');
+  if(adminSel&&pass==='admin123'){isAdmin=true;currentUser=name||'Admin';}
+  else if(!adminSel&&pass==='view123'){isAdmin=false;currentUser=name||'Viewer';}
+  else{alert('Wrong password.\nAdmin: admin123 | Viewer: view123');return;}
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('rbadge').textContent=isAdmin?'Admin':'Viewer';
+  document.getElementById('rbadge').className='rbadge'+(isAdmin?'':' viewer');
+  document.getElementById('uname').textContent=currentUser;
+  applyRole(); refreshAll();
+}
+function doLogout(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('lp').value='';
+}
+function applyRole(){
+  document.querySelectorAll('.admin-el').forEach(el=>el.style.display=isAdmin?'':'none');
+}
+
+// ========== NAV ==========
+function nav(el,pg){
+  document.querySelectorAll('.ttab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-'+pg).classList.add('active');
+  if(pg==='aibot')populateAIJD();
+  if(pg==='candidates')renderCandidatePage();
+}
+
+// ========== MODAL ==========
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ========== STATUS BADGE ==========
+function badge(s){
+  const m={'Selected':'bg','Rejected':'br','Interview Scheduled':'bb','Interview Done':'bp','Shortlisted':'by','Pending':'bgr','On Hold':'bgr','Open':'bg','Closed':'br'};
+  return `<span class="badge ${m[s]||'bgr'}">${s}</span>`;
+}
+
+// ========== REFRESH ==========
+function refreshAll(){renderDashboard();renderPositions();renderCandidatePage();renderJDs();applyRole();}
+
+// ========== DASHBOARD ==========
+function renderDashboard(){
+  const open=DB.positions.filter(p=>p.status==='Open').length;
+  const closed=DB.positions.filter(p=>p.status==='Closed').length;
+  const pend=DB.candidates.filter(c=>['Pending','Interview Scheduled','Shortlisted'].includes(c.status)).length;
+  document.getElementById('s-open').textContent=open;
+  document.getElementById('s-closed').textContent=closed;
+  document.getElementById('s-cands').textContent=DB.candidates.length;
+  document.getElementById('s-pending').textContent=pend;
+
+  // Bars
+  const bars=document.getElementById('dash-bars');
+  const openPos=DB.positions.filter(p=>p.status==='Open');
+  const maxC=Math.max(...openPos.map(p=>DB.candidates.filter(c=>c.position===p.title).length),1);
+  bars.innerHTML=openPos.length?openPos.map(p=>{
+    const n=DB.candidates.filter(c=>c.position===p.title).length;
+    const pct=Math.round(n/maxC*100);
+    const label=p.title.length>15?p.title.slice(0,14)+'…':p.title;
+    return `<div style="display:flex;align-items:center;gap:10px;"><div style="width:110px;font-size:12px;color:var(--text2);text-align:right;">${label}</div><div style="flex:1;height:20px;background:var(--surface2);border-radius:4px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:var(--green);border-radius:4px;display:flex;align-items:center;padding-left:6px;"><span style="font-size:11px;font-weight:600;color:#fff;">${n}</span></div></div></div>`;
+  }).join(''):'<div style="color:var(--text3);font-size:13px;">No open positions.</div>';
+
+  // Reviews
+  const revs=document.getElementById('dash-reviews');
+  const pr=DB.candidates.filter(c=>c.revSt!=='Feedback Submitted');
+  revs.innerHTML=pr.length?pr.slice(0,6).map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
+    <div><div style="font-weight:500;font-size:13px;">${c.name}</div><div style="font-size:11px;color:var(--text2);">${c.position} · ${c.round}</div></div>
+    <div style="text-align:right;"><div style="font-size:11px;color:var(--text2);">${c.panel||'No panel'}</div><span class="badge by" style="font-size:10px;">${c.revSt}</span></div>
+  </div>`):'<div style="color:var(--text3);font-size:13px;">All reviews done!</div>';
+
+  // Table
+  const tb=document.getElementById('dash-tbl');
+  tb.innerHTML=DB.positions.map(p=>{
+    const n=DB.candidates.filter(c=>c.position===p.title).length;
+    const iv=DB.candidates.filter(c=>c.position===p.title&&['Interview Scheduled','Interview Done'].includes(c.status)).length;
+    return `<tr><td style="font-weight:500;">${p.title}</td><td>${p.dept}</td><td>${p.openings}</td><td><span class="badge bb">${n}</span></td><td>${iv}</td><td>${badge(p.status)}</td><td style="color:var(--text2);">${p.date||'—'}</td></tr>`;
+  }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;">No positions yet.</td></tr>';
+}
+
+// ========== POSITIONS ==========
+function clearPositionForm(idx=null){
+  editPosIdx=idx;
+  document.getElementById('m-pos-title').textContent=idx!==null?'Edit Position':'Add Position';
+  const p=idx!==null?DB.positions[idx]:{};
+  ['title','dept','open','date','status','mgr','rem'].forEach(k=>{
+    const el=document.getElementById('p-'+k);
+    if(el)el.value=p[{title:'title',dept:'dept',open:'openings',date:'date',status:'status',mgr:'manager',rem:'remarks'}[k]]||'';
+  });
+  if(idx===null)document.getElementById('p-open').value=1;
+}
+function savePosition(){
+  const obj={
+    title:document.getElementById('p-title').value.trim(),
+    dept:document.getElementById('p-dept').value.trim(),
+    openings:parseInt(document.getElementById('p-open').value)||1,
+    date:document.getElementById('p-date').value,
+    status:document.getElementById('p-status').value,
+    manager:document.getElementById('p-mgr').value.trim(),
+    remarks:document.getElementById('p-rem').value.trim()
+  };
+  if(!obj.title){alert('Title required');return;}
+  if(editPosIdx!==null)DB.positions[editPosIdx]=obj;else DB.positions.push(obj);
+  persist();closeModal('m-position');refreshAll();
+}
+function renderPositions(){
+  const list=document.getElementById('pos-list');
+  if(!DB.positions.length){list.innerHTML='<div class="card" style="text-align:center;color:var(--text3);padding:40px;">No positions yet.</div>';return;}
+  list.innerHTML=DB.positions.map((p,i)=>{
+    const cands=DB.candidates.filter(c=>c.position===p.title);
+    const bySt={};cands.forEach(c=>{bySt[c.status]=(bySt[c.status]||0)+1;});
+    const penRev=cands.filter(c=>c.revSt!=='Feedback Submitted').length;
+    return `<div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div style="font-size:15px;font-weight:600;">${p.title} ${badge(p.status)}</div>
+          <div style="font-size:13px;color:var(--text2);margin-top:3px;">${p.dept} · ${p.openings} opening${p.openings>1?'s':''} · Manager: ${p.manager||'—'} · Target: ${p.date||'—'}</div>
+          ${p.remarks?`<div style="font-size:12px;color:var(--text3);margin-top:2px;">${p.remarks}</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;" class="admin-el">
+          <button class="btn btn-o btn-sm" onclick="clearPositionForm(${i});openModal('m-position')">Edit</button>
+          <button class="btn btn-d btn-sm" onclick="delPos(${i})">Delete</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+        <span class="chip">Total: <b>${cands.length}</b></span>
+        ${Object.entries(bySt).map(([s,n])=>`<span class="chip">${s}: <b>${n}</b></span>`).join('')}
+        ${penRev?`<span class="chip" style="border-color:var(--yellow);color:var(--yellow);">Panel Review Pending: <b>${penRev}</b></span>`:''}
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Candidate</th><th>Mode</th><th>Round</th><th>Status</th><th>Panel</th><th>Rev. Status</th><th>CTC→ECTC</th><th>Actions</th></tr></thead>
+        <tbody>${cands.length?cands.map(c=>{
+          const gi=DB.candidates.indexOf(c);
+          return `<tr>
+            <td><span style="font-weight:500;color:var(--blue);cursor:pointer;" onclick="openProfile(${gi})">${c.name}</span><div style="font-size:11px;color:var(--text3);">${c.company||''}</div></td>
+            <td><span class="badge ${c.mode==='Virtual'?'bb':'bg'}" style="font-size:10px;">${c.mode||'Virtual'}</span></td>
+            <td style="font-size:12px;">${c.round}</td>
+            <td>${badge(c.status)}</td>
+            <td style="font-size:12px;color:var(--text2);">${c.panel||'—'}</td>
+            <td><span class="badge ${c.revSt==='Feedback Submitted'?'bg':c.revSt==='Reviewing'?'by':'bgr'}" style="font-size:10px;">${c.revSt}</span></td>
+            <td style="font-size:12px;color:var(--text2);">${c.ctc?c.ctc+'→'+(c.ectc||'?')+' LPA':'—'}</td>
+            <td><div style="display:flex;gap:4px;flex-wrap:wrap;">
+              <button class="btn btn-o btn-sm" onclick="openProfile(${gi})">View</button>
+              <button class="btn btn-o btn-sm" onclick="openRemarks(${gi})">Feedback</button>
+              ${isAdmin?`<button class="btn btn-o btn-sm" onclick="openAddCandidate(${gi})">Edit</button>`:''}
+            </div></td>
+          </tr>`;
+        }).join(''):`<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:16px;">No candidates for this position.</td></tr>`}
+        </tbody>
+      </table></div>
+    </div>`;
+  }).join('');
+  applyRole();
+}
+function delPos(i){if(!isAdmin)return;if(confirm('Delete position?')){DB.positions.splice(i,1);persist();refreshAll();}}
+
+// ========== CANDIDATES ==========
+function openAddCandidate(idx=null){
+  if(!isAdmin)return;
+  editCandIdx=idx;
+  document.getElementById('m-cand-title').textContent=idx!==null?'Edit Candidate':'Add Candidate';
+  const c=idx!==null?DB.candidates[idx]:{};
+  document.getElementById('c-name').value=c.name||'';
+  document.getElementById('c-email').value=c.email||'';
+  document.getElementById('c-phone').value=c.phone||'';
+  document.getElementById('c-co').value=c.company||'';
+  document.getElementById('c-exp').value=c.exp||'';
+  document.getElementById('c-ctc').value=c.ctc||'';
+  document.getElementById('c-ectc').value=c.ectc||'';
+  document.getElementById('c-rfc').value=c.rfc||'';
+  document.getElementById('c-mode').value=c.mode||'Virtual';
+  document.getElementById('c-round').value=c.round||'Screening';
+  document.getElementById('c-status').value=c.status||'Pending';
+  document.getElementById('c-idate').value=c.idate||'';
+  document.getElementById('c-panel').value=c.panel||'';
+  document.getElementById('c-revst').value=c.revSt||'Pending';
+  document.getElementById('c-notice').value=c.notice||'';
+  document.getElementById('c-sum').value=c.summary||'';
+  document.getElementById('c-iaf').value=c.iaf||'';
+  document.getElementById('c-resume-label').textContent=c.resumeName?'Resume: '+c.resumeName:'Click to upload resume (PDF or Word)';
+  const sel=document.getElementById('c-pos');
+  sel.innerHTML=DB.positions.map(p=>`<option${p.title===c.position?' selected':''}>${p.title}</option>`).join('');
+  openModal('m-candidate');
+}
+let pendingResumeData={name:'',data:''};
+function handleCandResume(input){
+  const file=input.files[0];if(!file)return;
+  document.getElementById('c-resume-label').textContent='Loading: '+file.name;
+  pendingResumeData={name:file.name,data:''};
+  const reader=new FileReader();
+  reader.onload=e=>{pendingResumeData.data=e.target.result;document.getElementById('c-resume-label').textContent='✓ '+file.name;};
+  reader.readAsDataURL(file);
+}
+function saveCandidate(){
+  const obj={
+    name:document.getElementById('c-name').value.trim(),
+    email:document.getElementById('c-email').value.trim(),
+    phone:document.getElementById('c-phone').value.trim(),
+    position:document.getElementById('c-pos').value,
+    company:document.getElementById('c-co').value.trim(),
+    exp:document.getElementById('c-exp').value,
+    ctc:document.getElementById('c-ctc').value,
+    ectc:document.getElementById('c-ectc').value,
+    rfc:document.getElementById('c-rfc').value.trim(),
+    mode:document.getElementById('c-mode').value,
+    round:document.getElementById('c-round').value,
+    status:document.getElementById('c-status').value,
+    idate:document.getElementById('c-idate').value,
+    panel:document.getElementById('c-panel').value.trim(),
+    revSt:document.getElementById('c-revst').value,
+    notice:document.getElementById('c-notice').value,
+    summary:document.getElementById('c-sum').value.trim(),
+    iaf:document.getElementById('c-iaf').value.trim(),
+    remarks:editCandIdx!==null?(DB.candidates[editCandIdx].remarks||''):'',
+    recommendation:editCandIdx!==null?(DB.candidates[editCandIdx].recommendation||''):'',
+    resumeName:pendingResumeData.name||(editCandIdx!==null?DB.candidates[editCandIdx].resumeName||'':''),
+    resumeData:pendingResumeData.data||(editCandIdx!==null?DB.candidates[editCandIdx].resumeData||'':''),
+  };
+  if(!obj.name){alert('Name required');return;}
+  if(editCandIdx!==null)DB.candidates[editCandIdx]=obj;else DB.candidates.push(obj);
+  pendingResumeData={name:'',data:''};
+  persist();closeModal('m-candidate');refreshAll();
+}
+
+// Candidates Tab Page
+function renderCandidatePage(){
+  const positions=['All',...new Set(DB.candidates.map(c=>c.position)),...DB.positions.map(p=>p.title)].filter((v,i,a)=>a.indexOf(v)===i);
+  if(activeCandPos>=positions.length)activeCandPos=0;
+  const tabs=document.getElementById('cand-pos-tabs');
+  tabs.innerHTML=positions.map((p,i)=>`<div class="itab${i===activeCandPos?' active':''}" onclick="activeCandPos=${i};renderCandidatePage()">${p}</div>`).join('');
+  const selPos=positions[activeCandPos];
+  const cands=selPos==='All'?DB.candidates:DB.candidates.filter(c=>c.position===selPos);
+  const content=document.getElementById('cand-pos-content');
+  if(!cands.length){content.innerHTML='<div class="card" style="text-align:center;color:var(--text3);padding:40px;">No candidates for this position.</div>';return;}
+  content.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+    ${cands.map(c=>{
+      const gi=DB.candidates.indexOf(c);
+      const initials=c.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+      const rc=c.recommendation;
+      const rcbadge=rc?(rc.includes('Select')?'bg':rc.includes('Reject')?'br':'by'):'';
+      return `<div class="card" style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div class="avatar">${initials}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+            <div style="font-size:12px;color:var(--text2);">${c.company||''} ${c.exp?'· '+c.exp+'y':''}</div>
+            <div style="margin-top:4px;">${badge(c.status)}</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--text2);border-top:1px solid var(--border);padding-top:8px;">
+          <div><b>Position:</b> ${c.position}</div>
+          <div><b>Round:</b> ${c.round} <span class="badge ${c.mode==='Virtual'?'bb':'bg'}" style="font-size:10px;">${c.mode||''}</span></div>
+          <div><b>CTC:</b> ${c.ctc?c.ctc+' → '+(c.ectc||'?')+' LPA':'—'}</div>
+          <div><b>Panel:</b> ${c.panel||'—'}</div>
+          ${c.idate?`<div><b>Interview:</b> ${c.idate}</div>`:''}
+        </div>
+        ${rc?`<div><span class="badge ${rcbadge}">${rc}</span></div>`:''}
+        ${c.remarks?`<div style="font-size:12px;color:var(--text2);font-style:italic;">"${c.remarks.slice(0,80)}${c.remarks.length>80?'…':''}"</div>`:''}
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;">
+          <button class="btn btn-o btn-sm" onclick="openProfile(${gi})">View Profile</button>
+          <button class="btn btn-o btn-sm" onclick="openRemarks(${gi})">Feedback</button>
+          ${isAdmin?`<button class="btn btn-o btn-sm" onclick="openAddCandidate(${gi})">Edit</button>`:''}
+          <button class="btn btn-sm" style="background:var(--blue);color:#fff;border-color:var(--blue);" onclick="downloadCandPDF(${gi})">⬇ PDF</button>
+          ${c.resumeData?`<button class="btn btn-o btn-sm" onclick="viewResume(${gi})">Resume</button>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ========== PROFILE ==========
+function openProfile(idx){
+  const c=DB.candidates[idx];
+  const init=c.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  const rc=c.recommendation;
+  const rcbadge=rc?(rc.includes('Select')?'bg':rc.includes('Reject')?'br':'by'):'';
+  document.getElementById('profile-body').innerHTML=`
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:20px;">
+      <div class="avatar" style="width:60px;height:60px;font-size:20px;">${init}</div>
+      <div>
+        <div style="font-size:20px;font-weight:700;">${c.name}</div>
+        <div style="color:var(--text2);font-size:13px;">${c.company||''} ${c.exp?'· '+c.exp+' yrs':''}</div>
+        <div style="margin-top:6px;">${badge(c.status)} <span class="badge ${c.mode==='Virtual'?'bb':'bg'}" style="font-size:10px;">${c.mode}</span> <span class="badge bgr">${c.round}</span></div>
+      </div>
+      <div style="margin-left:auto;"><button class="btn btn-blue btn-sm" onclick="downloadCandPDF(${idx})">⬇ Download PDF</button></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-bottom:16px;">
+      <div><span style="color:var(--text2);">Position:</span> <b>${c.position}</b></div>
+      <div><span style="color:var(--text2);">Email:</span> ${c.email||'—'}</div>
+      <div><span style="color:var(--text2);">Phone:</span> ${c.phone||'—'}</div>
+      <div><span style="color:var(--text2);">Notice Period:</span> ${c.notice?c.notice+' days':'—'}</div>
+      <div><span style="color:var(--text2);">Current CTC:</span> <b>${c.ctc?c.ctc+' LPA':'—'}</b></div>
+      <div><span style="color:var(--text2);">Expected CTC:</span> <b>${c.ectc?c.ectc+' LPA':'—'}</b></div>
+      <div style="grid-column:1/-1;"><span style="color:var(--text2);">Reason for Change:</span> ${c.rfc||'—'}</div>
+      <div><span style="color:var(--text2);">Panel:</span> ${c.panel||'—'}</div>
+      <div><span style="color:var(--text2);">Interview Date:</span> ${c.idate||'—'}</div>
+      <div><span style="color:var(--text2);">Panel Status:</span> <span class="badge ${c.revSt==='Feedback Submitted'?'bg':c.revSt==='Reviewing'?'by':'bgr'}">${c.revSt}</span></div>
+    </div>
+    ${c.summary?`<div style="margin-bottom:14px;"><div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px;">CANDIDATE SUMMARY</div><div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;font-size:13px;line-height:1.6;">${c.summary}</div></div>`:''}
+    ${c.iaf?`<div style="margin-bottom:14px;"><div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px;">IAF / PROFILE DETAILS</div><div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;font-size:12px;line-height:1.8;white-space:pre-wrap;">${c.iaf}</div></div>`:''}
+    ${c.remarks||c.recommendation?`<div><div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px;">PANEL FEEDBACK</div><div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;">${c.remarks?`<p style="font-size:13px;margin-bottom:8px;">${c.remarks}</p>`:''}${rc?`<span class="badge ${rcbadge}">${rc}</span>`:''}</div></div>`:''}
+    ${c.resumeData?`<div style="margin-top:14px;"><button class="btn btn-o btn-sm" onclick="viewResume(${idx})">View Uploaded Resume</button></div>`:''}
+  `;
+  openModal('m-profile');
+}
+function viewResume(idx){
+  const c=DB.candidates[idx];
+  if(!c.resumeData)return;
+  const w=window.open('','_blank');
+  if(c.resumeName&&c.resumeName.endsWith('.pdf')){
+    w.document.write(`<iframe src="${c.resumeData}" style="width:100%;height:100vh;border:none;"></iframe>`);
+  } else {
+    w.document.write(`<html><body style="margin:0;background:#222;display:flex;align-items:center;justify-content:center;min-height:100vh;"><p style="color:#fff;font-size:14px;">Resume: ${c.resumeName||'file'}<br><a href="${c.resumeData}" download style="color:#7fc9a2;">Download file</a></p></body></html>`);
+  }
+}
+
+// ========== PDF DOWNLOAD ==========
+function downloadCandPDF(idx){
+  const c=DB.candidates[idx];
+  const rc=c.recommendation;
+  const rcColor=rc?(rc.includes('Select')?'#1b6b45':rc.includes('Reject')?'#b91c1c':'#92400e'):'#666';
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${c.name} - Profile</title><style>
+  body{font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:0;color:#1c1a17;background:#fff;}
+  .header{background:#1b6b45;color:#fff;padding:28px 32px;}
+  .header h1{font-size:22px;margin:0 0 4px;}
+  .header p{font-size:13px;opacity:.8;margin:0;}
+  .content{padding:24px 32px;}
+  .section{margin-bottom:20px;}
+  .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#5c5a54;border-bottom:1px solid #e4e1d8;padding-bottom:6px;margin-bottom:12px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .field label{font-size:11px;color:#5c5a54;display:block;}
+  .field span{font-size:13px;font-weight:500;}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+  .text-box{background:#f7f5f1;border:1px solid #e4e1d8;border-radius:6px;padding:12px;font-size:12px;line-height:1.7;white-space:pre-wrap;}
+  .rec{background:#f7f5f1;border-left:3px solid ${rcColor};padding:10px 14px;font-weight:600;color:${rcColor};font-size:13px;}
+  </style></head><body>
+  <div class="header"><h1>${c.name}</h1><p>${c.position} · ${c.company||''} ${c.exp?'· '+c.exp+' yrs exp':''}</p></div>
+  <div class="content">
+    <div class="section"><div class="section-title">Contact & Basic Info</div>
+      <div class="grid">
+        <div class="field"><label>Email</label><span>${c.email||'—'}</span></div>
+        <div class="field"><label>Phone</label><span>${c.phone||'—'}</span></div>
+        <div class="field"><label>Current Company</label><span>${c.company||'—'}</span></div>
+        <div class="field"><label>Experience</label><span>${c.exp?c.exp+' years':'—'}</span></div>
+        <div class="field"><label>Notice Period</label><span>${c.notice?c.notice+' days':'—'}</span></div>
+      </div>
+    </div>
+    <div class="section"><div class="section-title">Compensation</div>
+      <div class="grid">
+        <div class="field"><label>Current CTC</label><span>${c.ctc?c.ctc+' LPA':'—'}</span></div>
+        <div class="field"><label>Expected CTC</label><span>${c.ectc?c.ectc+' LPA':'—'}</span></div>
+        <div class="field" style="grid-column:1/-1;"><label>Reason for Change</label><span>${c.rfc||'—'}</span></div>
+      </div>
+    </div>
+    <div class="section"><div class="section-title">Interview Details</div>
+      <div class="grid">
+        <div class="field"><label>Interview Mode</label><span>${c.mode||'—'}</span></div>
+        <div class="field"><label>Round</label><span>${c.round}</span></div>
+        <div class="field"><label>Status</label><span>${c.status}</span></div>
+        <div class="field"><label>Interview Date</label><span>${c.idate||'—'}</span></div>
+        <div class="field" style="grid-column:1/-1;"><label>Panel Members</label><span>${c.panel||'—'}</span></div>
+        <div class="field"><label>Panel Review Status</label><span>${c.revSt}</span></div>
+      </div>
+    </div>
+    ${c.summary?`<div class="section"><div class="section-title">Candidate Summary</div><div class="text-box">${c.summary}</div></div>`:''}
+    ${c.iaf?`<div class="section"><div class="section-title">IAF / Profile Details</div><div class="text-box">${c.iaf}</div></div>`:''}
+    ${c.remarks?`<div class="section"><div class="section-title">Interview Remarks</div><div class="text-box">${c.remarks}</div></div>`:''}
+    ${rc?`<div class="section"><div class="section-title">Final Recommendation</div><div class="rec">${rc}</div></div>`:''}
+    <div style="margin-top:24px;font-size:11px;color:#9a9790;border-top:1px solid #e4e1d8;padding-top:12px;">Generated by Recruit HR Track · ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</div>
+  </div></body></html>`;
+  const w=window.open('','_blank');
+  w.document.write(html);w.document.close();
+  setTimeout(()=>w.print(),800);
+}
+
+// ========== REMARKS ==========
+function openRemarks(idx){
+  document.getElementById('rem-idx').value=idx;
+  document.getElementById('rem-txt').value=DB.candidates[idx].remarks||'';
+  document.getElementById('rem-rec').value=DB.candidates[idx].recommendation||'';
+  openModal('m-remarks');
+}
+function saveRemarks(){
+  const idx=parseInt(document.getElementById('rem-idx').value);
+  DB.candidates[idx].remarks=document.getElementById('rem-txt').value.trim();
+  DB.candidates[idx].recommendation=document.getElementById('rem-rec').value;
+  // auto-update reviewer status
+  if(DB.candidates[idx].remarks)DB.candidates[idx].revSt='Feedback Submitted';
+  persist();closeModal('m-remarks');refreshAll();
+}
+
+// ========== JD ==========
+function clearJDForm(idx=null){
+  editJDIdx=idx;
+  document.getElementById('m-jd-title').textContent=idx!==null?'Edit JD':'Upload Job Description';
+  const j=idx!==null?DB.jds[idx]:{};
+  document.getElementById('jd-title').value=j.title||'';
+  document.getElementById('jd-dept').value=j.dept||'';
+  document.getElementById('jd-exp').value=j.exp||'';
+  document.getElementById('jd-loc').value=j.loc||'';
+  document.getElementById('jd-skills').value=j.skills||'';
+  document.getElementById('jd-desc').value=j.desc||'';
+  document.getElementById('jd-file-name').textContent='';
+}
+
+async function handleJDUpload(input){
+  const file=input.files[0];if(!file)return;
+  document.getElementById('jd-file-name').textContent='Processing: '+file.name+'…';
+  document.getElementById('jd-desc').value='Extracting text…';
+
+  // Try to auto-fill title from filename
+  const fname=file.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
+  if(!document.getElementById('jd-title').value)document.getElementById('jd-title').value=fname;
+
+  if(file.name.endsWith('.pdf')){
+    // Use FileReader to get base64 for PDF, send to AI for extraction
+    const reader=new FileReader();
+    reader.onload=async e=>{
+      const b64=e.target.result.split(',')[1];
+      await extractJDWithAI(b64,'application/pdf',file.name);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    // DOCX — use mammoth
+    const reader=new FileReader();
+    reader.onload=async e=>{
+      try{
+        const result=await mammoth.extractRawText({arrayBuffer:e.target.result});
+        const text=result.value;
+        document.getElementById('jd-desc').value=text;
+        document.getElementById('jd-file-name').textContent='✓ '+file.name+' — text extracted';
+        autoFillJDFields(text);
+      }catch(err){
+        document.getElementById('jd-desc').value='Could not extract text. Please paste manually.';
+        document.getElementById('jd-file-name').textContent='⚠ Could not extract: '+file.name;
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+async function extractJDWithAI(b64,mtype,fname){
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2000,
+        messages:[{role:'user',content:[
+          {type:'document',source:{type:'base64',media_type:mtype,data:b64}},
+          {type:'text',text:'Extract the full text from this Job Description document. Return only the raw JD text, no commentary.'}
+        ]}]
+      })
+    });
+    const d=await res.json();
+    if(d.error){throw new Error(d.error.message);}
+    const text=d.content.map(x=>x.text||'').join('');
+    document.getElementById('jd-desc').value=text;
+    document.getElementById('jd-file-name').textContent='✓ '+fname+' — text extracted';
+    autoFillJDFields(text);
+  }catch(e){
+    document.getElementById('jd-desc').value='Could not auto-extract. Paste JD text manually.\nError: '+e.message;
+    document.getElementById('jd-file-name').textContent='⚠ Extraction failed for '+fname;
+  }
+}
+
+function autoFillJDFields(text){
+  // Auto-detect skills
+  const skillKeywords=['React','Angular','Vue','Node.js','Python','Java','SQL','TypeScript','AWS','GCP','Azure','Power BI','Tableau','Excel','Figma','Kubernetes','Docker','GraphQL','REST','Spring','Django','Flutter','Swift','Kotlin','PHP','Ruby','Go','Scala','Spark','Hadoop','Salesforce','SAP','JIRA'];
+  const found=skillKeywords.filter(s=>text.toLowerCase().includes(s.toLowerCase()));
+  if(found.length&&!document.getElementById('jd-skills').value)document.getElementById('jd-skills').value=found.join(', ');
+  // Detect exp
+  const expMatch=text.match(/(\d+[\+\-–]\s*\d*)\s*years?/i);
+  if(expMatch&&!document.getElementById('jd-exp').value)document.getElementById('jd-exp').value=expMatch[1]+' years';
+}
+
+function saveJD(){
+  const obj={
+    title:document.getElementById('jd-title').value.trim(),
+    dept:document.getElementById('jd-dept').value.trim(),
+    exp:document.getElementById('jd-exp').value.trim(),
+    loc:document.getElementById('jd-loc').value.trim(),
+    skills:document.getElementById('jd-skills').value.trim(),
+    desc:document.getElementById('jd-desc').value.trim()
+  };
+  if(!obj.title){alert('Title required');return;}
+  if(!obj.desc){alert('JD text required');return;}
+  if(editJDIdx!==null)DB.jds[editJDIdx]=obj;else DB.jds.push(obj);
+  persist();closeModal('m-jd');refreshAll();
+}
+function renderJDs(){
+  const list=document.getElementById('jd-list');
+  if(!DB.jds.length){list.innerHTML='<div class="card" style="text-align:center;color:var(--text3);padding:40px;">No JDs uploaded yet. Click "+ Upload JD" to add one.</div>';return;}
+  list.innerHTML=DB.jds.map((j,i)=>{
+    const skills=j.skills?j.skills.split(',').map(s=>`<span class="chip">${s.trim()}</span>`).join(''):'';
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div style="font-size:16px;font-weight:600;">${j.title}</div>
+          <div style="font-size:13px;color:var(--text2);margin-top:3px;">${j.dept||''} ${j.loc?'· '+j.loc:''} ${j.exp?'· '+j.exp:''}</div>
+        </div>
+        <div style="display:flex;gap:6px;" class="admin-el">
+          <button class="btn btn-o btn-sm" onclick="clearJDForm(${i});openModal('m-jd')">Edit</button>
+          <button class="btn btn-d btn-sm" onclick="delJD(${i})">Delete</button>
+        </div>
+      </div>
+      ${skills?`<div style="margin-bottom:12px;">${skills}</div>`:''}
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:14px;font-size:12px;line-height:1.8;white-space:pre-wrap;max-height:240px;overflow-y:auto;">${j.desc}</div>
+    </div>`;
+  }).join('');
+  applyRole();
+}
+function delJD(i){if(!isAdmin)return;if(confirm('Delete JD?')){DB.jds.splice(i,1);persist();refreshAll();}}
+
+// ========== AI SCREENER ==========
+function populateAIJD(){
+  const sel=document.getElementById('ai-jd');
+  sel.innerHTML='<option value="">-- Select JD --</option>'+DB.jds.map((j,i)=>`<option value="${i}">${j.title}</option>`).join('');
+}
+function updateJDPreview(){
+  const idx=parseInt(document.getElementById('ai-jd').value);
+  document.getElementById('ai-jd-preview').textContent=isNaN(idx)?'':DB.jds[idx].desc;
+}
+// Drag support
+['dragover','dragenter'].forEach(e=>document.addEventListener(e,ev=>{
+  if(ev.target.closest('#ai-resume-zone'))ev.target.closest('#ai-resume-zone').classList.add('dragging');
+}));
+document.addEventListener('dragleave',ev=>{if(ev.target.closest('#ai-resume-zone'))ev.target.closest('#ai-resume-zone').classList.remove('dragging');});
+document.addEventListener('drop',ev=>{
+  const zone=ev.target.closest('#ai-resume-zone');
+  if(zone){ev.preventDefault();zone.classList.remove('dragging');const f=ev.dataTransfer.files[0];if(f){document.getElementById('ai-resume-file').files=ev.dataTransfer.files;handleAIResume({files:ev.dataTransfer.files});}}
+});
+
+function handleAIResume(input){
+  const file=input.files[0];if(!file)return;
+  const zone=document.getElementById('ai-resume-zone');
+  zone.querySelector('div').textContent='Loading…';
+  if(file.name.endsWith('.pdf')){
+    const r=new FileReader();r.onload=e=>{window._aiResumeB64=e.target.result.split(',')[1];window._aiResumeMtype='application/pdf';zone.innerHTML=`<div style="font-size:14px;">📄 ${file.name}</div><div style="font-size:12px;color:var(--green);">Ready for analysis</div>`;};r.readAsDataURL(file);
+  } else {
+    const r=new FileReader();r.onload=async e=>{
+      try{const res=await mammoth.extractRawText({arrayBuffer:e.target.result});document.getElementById('ai-resume-txt').value=res.value;zone.innerHTML=`<div style="font-size:14px;">📄 ${file.name}</div><div style="font-size:12px;color:var(--green);">Text extracted — ready</div>`;}
+      catch(err){zone.innerHTML=`<div style="font-size:13px;color:var(--red);">Could not extract — paste text below</div>`;}
+    };r.readAsArrayBuffer(file);
+  }
+}
+
+async function runScreening(){
+  const jdIdx=parseInt(document.getElementById('ai-jd').value);
+  if(isNaN(jdIdx)){alert('Select a JD first');return;}
+  const jd=DB.jds[jdIdx];
+  const txt=document.getElementById('ai-resume-txt').value.trim();
+  const cname=document.getElementById('ai-cname').value.trim()||'Candidate';
+  const b64=window._aiResumeB64;
+  const mtype=window._aiResumeMtype;
+  if(!txt&&!b64){alert('Upload or paste resume first');return;}
+  const btn=document.getElementById('ai-btn');btn.textContent='Analysing…';btn.disabled=true;
+
+  const prompt=`You are a senior HR recruiter. Analyse this candidate's resume against the job description below. Respond ONLY with valid JSON (no markdown, no explanation).
+
+JOB DESCRIPTION:
+Title: ${jd.title}
+Department: ${jd.dept}
+Experience: ${jd.exp}
+Location: ${jd.loc}
+Key Skills: ${jd.skills}
+Full JD:
+${jd.desc}
+
+${txt?'CANDIDATE RESUME (text):\n'+txt:'(Resume provided as document above)'}
+
+Respond with this exact JSON:
+{"score":85,"verdict":"Strong Match","strengths":["str1","str2","str3"],"gaps":["gap1","gap2"],"skills_matched":["s1","s2"],"skills_missing":["s1","s2"],"experience_match":"Meets Requirements","summary":"2-3 sentence assessment.","recommendation":"Proceed to next round","notice_period_ok":true,"ctc_note":""}`;
+
+  try{
+    const msgContent=b64?[{type:'document',source:{type:'base64',media_type:mtype,data:b64}},{type:'text',text:prompt}]:[{type:'text',text:prompt}];
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:msgContent}]})
+    });
+    const d=await res.json();
+    if(d.error)throw new Error(d.error.message);
+    const rawText=d.content.map(x=>x.text||'').join('');
+    let result;
+    try{result=JSON.parse(rawText.replace(/```json|```/g,'').trim());}catch(e){result=null;}
+    renderAIResult(result,cname,jd.title,rawText);
+    lastAnalysis={jd,txt:txt||'[PDF document]',result,cname};
+    window._aiResumeB64=null;
+  }catch(e){
+    document.getElementById('ai-result-wrap').style.display='';
+    document.getElementById('ai-result').innerHTML=`<div style="color:var(--red);padding:14px;background:var(--red-l);border-radius:var(--rs);">Error: ${e.message}</div>`;
+  }
+  btn.textContent='Analyse Resume';btn.disabled=false;
+}
+
+function renderAIResult(result,name,jdTitle,raw){
+  document.getElementById('ai-result-wrap').style.display='';
+  const div=document.getElementById('ai-result');
+  if(!result){div.innerHTML=`<div style="white-space:pre-wrap;font-size:13px;">${raw}</div>`;return;}
+  const sc=result.score;
+  const scClass=sc>=75?'score-high':sc>=50?'score-med':'score-low';
+  const vcol={'Strong Match':'bg','Good Match':'bb','Partial Match':'by','Not Suitable':'br'}[result.verdict]||'bgr';
+  const rcol=result.recommendation&&(result.recommendation.toLowerCase().includes('do not')||result.recommendation.toLowerCase().includes('not'))?'br':result.recommendation&&result.recommendation.toLowerCase().includes('hold')?'by':'bg';
+  div.innerHTML=`
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+      <div class="score-ring ${scClass}">${sc}%</div>
+      <div>
+        <div style="font-size:16px;font-weight:600;">${name} <span class="badge ${vcol}">${result.verdict}</span></div>
+        <div style="font-size:13px;color:var(--text2);">vs. ${jdTitle}</div>
+        <div style="margin-top:6px;"><span class="badge ${rcol}">${result.recommendation}</span> <span class="badge bgr">${result.experience_match}</span></div>
+      </div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-bottom:14px;font-size:13px;line-height:1.6;">${result.summary}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px;text-transform:uppercase;">Strengths</div>${(result.strengths||[]).map(s=>`<div style="font-size:12px;margin-bottom:3px;">✓ ${s}</div>`).join('')}</div>
+      <div><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:6px;text-transform:uppercase;">Gaps</div>${(result.gaps||[]).map(g=>`<div style="font-size:12px;margin-bottom:3px;">✗ ${g}</div>`).join('')}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div><div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase;">Skills Matched</div><div style="display:flex;flex-wrap:wrap;gap:4px;">${(result.skills_matched||[]).map(s=>`<span class="chip" style="border-color:var(--green);color:var(--green-d);">${s}</span>`).join('')}</div></div>
+      <div><div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase;">Skills Missing</div><div style="display:flex;flex-wrap:wrap;gap:4px;">${(result.skills_missing||[]).map(s=>`<span class="chip" style="border-color:var(--red);color:var(--red);">${s}</span>`).join('')}</div></div>
+    </div>
+    ${result.ctc_note?`<div style="margin-top:12px;font-size:12px;color:var(--text2);">💰 ${result.ctc_note}</div>`:''}
+  `;
+}
+
+async function aiChat(){
+  const q=document.getElementById('ai-q').value.trim();if(!q)return;
+  const log=document.getElementById('ai-log');
+  log.innerHTML+=`<div class="ai-msg ai-user">${q}</div>`;
+  document.getElementById('ai-q').value='';
+  const typing=document.createElement('div');typing.className='ai-msg ai-bot';typing.id='ai-typing';typing.textContent='Thinking…';log.appendChild(typing);log.scrollTop=log.scrollHeight;
+  const ctx=lastAnalysis?`Context: JD for "${lastAnalysis.jd.title}". Candidate "${lastAnalysis.cname}". Score: ${lastAnalysis.result?.score||'?'}%. Verdict: ${lastAnalysis.result?.verdict||'?'}.`:'No screening done yet.';
+  const btn=document.getElementById('ai-chat-btn');btn.disabled=true;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,system:`You are a helpful recruitment assistant. ${ctx} Be concise and practical.`,messages:[{role:'user',content:q}]})
+    });
+    const d=await res.json();
+    if(d.error)throw new Error(d.error.message);
+    const txt=d.content.map(x=>x.text||'').join('');
+    document.getElementById('ai-typing').outerHTML=`<div class="ai-msg ai-bot">${txt.replace(/\n/g,'<br>')}</div>`;
+  }catch(e){document.getElementById('ai-typing').outerHTML=`<div class="ai-msg ai-bot" style="color:var(--red);">Error: ${e.message}</div>`;}
+  btn.disabled=false;log.scrollTop=log.scrollHeight;
+}
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter'&&document.activeElement===document.getElementById('ai-q'))aiChat();});
+</script>
+</body>
+</html>
